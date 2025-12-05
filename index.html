@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الموارد البشرية V29 - النسخة الكاملة والمستقرة</title>
+    <title>نظام الموارد البشرية V30 - النسخة الملونة والمحسنة</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -61,6 +61,12 @@
         .grid-table tr:last-child td { border-bottom: none; }
         .grid-table tr:hover td { background-color: #f8fafc; }
         
+        /* --- ألوان الصفوف حسب النوع --- */
+        .row-fine { background-color: #fef2f2 !important; } /* أحمر فاتح للغرامات */
+        .row-bonus { background-color: #f0fdf4 !important; } /* أخضر فاتح للمكافآت */
+        .row-ratio { background-color: #faf5ff !important; } /* بنفسجي فاتح للنسب */
+        .row-warning { background-color: #fff7ed !important; } /* برتقالي للتنبيهات */
+
         /* تنسيق الأعمدة الخاصة */
         .col-name { min-width: 250px; text-align: right !important; font-weight: bold; }
         
@@ -185,7 +191,7 @@
                     <i class="fas fa-shield-alt text-2xl"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-xl md:text-2xl tracking-wide">نظام الموارد البشرية <span class="bg-blue-500 text-[10px] px-2 py-0.5 rounded-full ml-1 align-middle">V29</span></h1>
+                    <h1 class="font-bold text-xl md:text-2xl tracking-wide">نظام الموارد البشرية <span class="bg-blue-500 text-[10px] px-2 py-0.5 rounded-full ml-1 align-middle">V30</span></h1>
                     <p id="headerSubtitle" class="text-xs text-slate-400 mt-1 font-mono">جاري التحميل...</p>
                 </div>
             </div>
@@ -436,8 +442,8 @@
     </div>
 
     <script>
-        // *** رابط السيرفر المحدث ***
-        const API_URL = "https://script.google.com/macros/s/AKfycbxYd5A62T3kvUwMLMVjJ_Ffk9b0fp0LmVxCwiRL_rjQALc27KJVbfp8XRiul3GpobKzSw/exec";
+        // *** الرابط الجديد من نشرك الأخير ***
+        const API_URL = "https://script.google.com/macros/s/AKfycbxovF5MoXu5igE0Zqs3_MqcBcPgmsIAkxPMcWjlIMSUlULRBftzj-AoeUlIJHbMI73NSg/exec";
         
         // متغيرات الحالة
         let currentUser = null;
@@ -449,12 +455,12 @@
 
         // --- إدارة الجلسة (Session Persistence) ---
         window.addEventListener('load', () => {
-            const savedUser = localStorage.getItem('hrUserV29');
+            const savedUser = localStorage.getItem('hrUserV30');
             if(savedUser) {
                 try {
                     currentUser = JSON.parse(savedUser);
                     initApp(); // استعادة الجلسة مباشرة
-                } catch(e) { localStorage.removeItem('hrUserV29'); }
+                } catch(e) { localStorage.removeItem('hrUserV30'); }
             } else {
                 document.getElementById('headerSubtitle').innerText = "تسجيل الدخول مطلوب";
             }
@@ -475,7 +481,7 @@
                 
                 if(d.result === "success") {
                     currentUser = d.data; currentUser.fp = f; currentUser.code = c;
-                    localStorage.setItem('hrUserV29', JSON.stringify(currentUser)); // حفظ الجلسة
+                    localStorage.setItem('hrUserV30', JSON.stringify(currentUser)); // حفظ الجلسة
                     initApp();
                 } else {
                     document.getElementById('loginMsg').innerText = d.message;
@@ -496,7 +502,7 @@
 
         function logout() {
             if(confirm("هل تريد تسجيل الخروج؟")) {
-                localStorage.removeItem('hrUserV29');
+                localStorage.removeItem('hrUserV30');
                 location.reload();
             }
         }
@@ -582,7 +588,7 @@
                     fillSpe(tr.querySelector('.gen-input'));
                     tr.querySelector('.spe-input').value = cloneTr.querySelector('.spe-input').value;
                     tr.querySelector('.grp-input').value = cloneTr.querySelector('.grp-input').value;
-                    checkType(tr.querySelector('.type-input')); // Apply logic
+                    checkType(tr.querySelector('.type-input')); 
                 }
             }
             checkEmpty();
@@ -625,10 +631,8 @@
             let errorMsg = "";
             const trs = document.querySelectorAll('#gridBody tr');
             
-            // 1. التحقق من وجود صفوف
             if(trs.length === 0) return showToast("القائمة فارغة، أضف بيانات أولاً", true);
 
-            // 2. التحقق من صحة البيانات في كل صف قبل الإرسال
             for (let i = 0; i < trs.length; i++) {
                 const tr = trs[i];
                 const fp = tr.querySelector('.fp-input').value.trim();
@@ -639,35 +643,14 @@
                 const reason = tr.querySelector('.reason-input').value.trim();
                 const grp = tr.querySelector('.grp-input').value;
 
-                // أ) التحقق من اكتمال جلب الاسم
-                if (name === "جاري البحث...") {
-                    errorMsg = `خطأ في الصف رقم ${i+1}: يرجى الانتظار لحين ظهور اسم الموظف قبل الحفظ.`;
-                    break;
-                }
+                if (name === "جاري البحث...") { errorMsg = `خطأ في الصف رقم ${i+1}: يرجى الانتظار لحين ظهور اسم الموظف.`; break; }
+                if (!name || name === "غير موجود" || name === "خطأ") { errorMsg = `خطأ في الصف رقم ${i+1}: البصمة غير صحيحة.`; break; }
+                if(!fp || !reason || !grp) { errorMsg = `خطأ في الصف رقم ${i+1}: بيانات ناقصة.`; break; }
                 
-                // ب) التحقق من صحة البصمة
-                if (!name || name === "غير موجود" || name === "خطأ" || !name) {
-                    errorMsg = `خطأ في الصف رقم ${i+1}: رقم البصمة غير صحيح أو الموظف غير معرف.`;
-                    break;
-                }
-
-                // ج) التحقق من الحقول الإجبارية الأخرى
-                if(!fp || !reason || !grp) {
-                    errorMsg = `خطأ في الصف رقم ${i+1}: هناك بيانات ناقصة (السبب أو الجروب أو البصمة).`;
-                    break;
-                }
-                
-                // د) التحقق من المبلغ (حسب النوع)
                 if(currentMode === 'fine') {
-                    if(type === 'غرامة' && (isNaN(amt) || amt < 1000)) { 
-                        errorMsg = `خطأ في الصف رقم ${i+1}: مبلغ الغرامة يجب أن يكون 1000 دينار أو أكثر.`; 
-                        break; 
-                    }
+                    if(type === 'غرامة' && (isNaN(amt) || amt < 1000)) { errorMsg = `الصف ${i+1}: الغرامة يجب أن تكون 1000 أو أكثر.`; break; }
                 } else {
-                     if(isNaN(amt)) { 
-                         errorMsg = `خطأ في الصف رقم ${i+1}: المبلغ غير صحيح.`; 
-                         break; 
-                     }
+                     if(isNaN(amt)) { errorMsg = `الصف ${i+1}: المبلغ غير صحيح.`; break; }
                 }
 
                 rows.push({
@@ -681,34 +664,23 @@
                 });
             }
 
-            // إذا وجد خطأ، نوقف العملية ونظهر الرسالة
             if(errorMsg) return showToast(errorMsg, true);
 
-            // 3. قفل الزر وتغيير حالته (لمنع التكرار)
             const btn = document.getElementById('btnSubmitBulk');
-            const originalText = btn.innerHTML; // حفظ النص الأصلي للزر
-            
+            const originalText = btn.innerHTML;
             btn.innerHTML = '<span class="loader border-white border-t-transparent"></span> جاري الحفظ والإرسال...';
-            btn.disabled = true; // تعطيل الزر تماماً
-            btn.classList.add('opacity-50', 'cursor-not-allowed'); // تغيير الشكل ليدل على التعطيل
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
             
             try {
-                const r = await fetch(API_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: "save_bulk", mode: currentMode, rows, addedBy: currentUser.name }) 
-                });
+                const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "save_bulk", mode: currentMode, rows, addedBy: currentUser.name }) });
                 const d = await r.json();
-                
                 if(d.result === "success") {
                     showToast("تم الحفظ والإرسال بنجاح");
-                    openBulkForm(currentMode); // إعادة تعيين الجدول وتنظيفه
-                } else {
-                    showToast("حدث خطأ في السيرفر: " + d.message, true);
-                }
-            } catch(e) { 
-                showToast("فشل الاتصال بالسيرفر، تأكد من الإنترنت", true); 
-            } finally {
-                // 4. إعادة تفعيل الزر في كل الأحوال (سواء نجح أو فشل)
+                    openBulkForm(currentMode); 
+                } else showToast("خطأ: " + d.message, true);
+            } catch(e) { showToast("فشل الاتصال", true); } 
+            finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -746,7 +718,7 @@
             } else {
                 document.getElementById('tabTrack').classList.add('active');
                 document.getElementById('trackerInputDiv').classList.remove('hidden');
-                th.innerHTML = `<tr><th>النوع</th><th>التفاصيل</th><th>التاريخ</th><th>الحالة</th></tr>`;
+                th.innerHTML = `<tr><th>النوع</th><th>المبلغ</th><th>السبب</th><th>التاريخ</th><th>الحالة</th></tr>`;
             }
         }
 
@@ -797,12 +769,14 @@
             } else {
                 data.forEach(x => {
                     const imgBtn = x.objImg ? `<a href="${x.objImg}" target="_blank" class="inline-flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-700 transition mt-2"><i class="fas fa-image"></i> عرض الصورة</a>` : '';
+                    const hrResponseHTML = x.hrResponse ? `<div class="mt-2 pt-2 border-t text-xs text-green-800"><b>رد HR:</b> ${x.hrResponse}</div>` : '';
+                    
                     tb.innerHTML += `<tr>
                         <td class="text-right"><b>${x.name}</b><br><span class="text-xs text-gray-400">${x.fp}</span></td>
                         <td>${x.amount}<br><span class="text-xs bg-slate-100 rounded px-1">${x.type}</span></td>
                         <td class="text-xs max-w-xs text-right">${x.reason}</td>
                         <td class="bg-amber-50 p-3 text-xs border-r-4 border-amber-400 max-w-xs text-right rounded-r-none rounded-l-lg shadow-sm">
-                           <div class="font-bold text-amber-800 mb-1">الاعتراض:</div> ${x.objReason} ${imgBtn}
+                           <div class="font-bold text-amber-800 mb-1">الاعتراض:</div> ${x.objReason} ${imgBtn} ${hrResponseHTML}
                         </td>
                         <td class="text-xs font-mono"><div class="text-amber-700">Due: ${x.dueDate}</div><div class="text-gray-500">Add: ${x.entryDate}</div></td>
                         <td><span class="text-xs font-bold ${x.objStatus==='قيد المراجعة'?'text-amber-600 animate-pulse':'text-slate-600'}">${x.objStatus}</span></td>
@@ -899,7 +873,7 @@
                 
                 closeModal(); 
                 loadMonitoringFiltered(); 
-                showToast("تم حفظ القرار بنجاح");
+                showToast("تم تحديث حالة الطلب");
             });
         }
 
@@ -914,7 +888,6 @@
         async function openMyReceived() { 
             hideAll(); document.getElementById('userHistorySection').classList.remove('hidden'); document.getElementById('historyTitle').innerText = "ملفي الشخصي";
             
-            // 1. الدوام
             const rA = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "get_my_attendance", fp: currentUser.fp }) }); 
             const dA = await rA.json();
             const attB = document.getElementById('attBody'); attB.innerHTML = "";
@@ -923,7 +896,6 @@
                 dA.data.forEach(a => attB.innerHTML += `<tr><td class="font-mono font-bold">${a.date}</td><td class="font-mono text-green-600">${a.in}</td><td class="font-mono text-red-600">${a.out}</td><td class="font-bold bg-slate-50">${a.dur}</td></tr>`); 
             } else document.getElementById('attDiv').classList.add('hidden');
             
-            // 2. العمليات
             const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "get_my_received", fp: currentUser.fp }) }); 
             const d = await r.json(); renderUserTable(d.data, true);
         }
@@ -939,12 +911,18 @@
             document.getElementById('historyThead').innerHTML = isRec ? `<tr><th>النوع</th><th>المبلغ</th><th>السبب</th><th>التاريخ</th><th>الحالة</th><th>إجراء</th></tr>` : `<tr><th>الموظف</th><th>النوع</th><th>المبلغ</th><th>التاريخ</th><th>-</th></tr>`;
             
             data.forEach(x => {
+                // تحديد لون الصف
+                let rowClass = "";
+                if (x.sheetType === 'fine') rowClass = x.type === 'تنبيه' ? 'row-warning' : 'row-fine';
+                else if (x.sheetType === 'bonus') rowClass = 'row-bonus';
+                else if (x.sheetType === 'ratio') rowClass = 'row-ratio';
+
                 if(isRec) {
                     const btn = (x.objStatus && x.objStatus !== "لا يوجد") 
                         ? `<span class="bg-gray-100 text-xs p-1.5 rounded-lg border font-bold text-slate-500">تم تقديم اعتراض</span>` 
                         : `<button onclick="objModal('${x.id}','${x.sheetType}')" class="text-blue-600 bg-blue-50 px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-100 transition">تقديم اعتراض</button>`;
                     
-                    tb.innerHTML += `<tr>
+                    tb.innerHTML += `<tr class="${rowClass}">
                         <td>${x.type}</td><td class="font-bold">${x.amount}</td>
                         <td class="text-xs">${x.reason}</td>
                         <td class="text-xs font-mono">${x.date}</td>
@@ -952,7 +930,7 @@
                         <td>${btn}</td>
                     </tr>`;
                 } else {
-                    tb.innerHTML += `<tr><td>${x.name}</td><td>${x.type}</td><td>${x.amount}</td><td class="font-mono text-xs">${x.date}</td><td>-</td></tr>`;
+                    tb.innerHTML += `<tr class="${rowClass}"><td>${x.name}</td><td>${x.type}</td><td>${x.amount}</td><td class="font-mono text-xs">${x.date}</td><td>-</td></tr>`;
                 }
             });
         }
@@ -989,7 +967,43 @@
         async function loadEditRequests() { const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "get_edit_requests" }) }); const d = await r.json(); const tb = document.getElementById('activeTbody'); tb.innerHTML=""; d.data.forEach(x=>{ const btn=x.status==='قيد الانتظار'?`<button onclick="editAction('${x.reqId}')" class="text-purple-600 font-bold bg-purple-50 px-2 py-1 rounded">معالجة</button>`:x.status; tb.innerHTML+=`<tr><td>${x.reqId}</td><td>${x.requester}</td><td>${x.type}</td><td class="text-xs text-gray-500">${x.original}</td><td>${x.status}</td><td>${btn}</td></tr>`}); }
         function editAction(id) { showModal("معالجة الطلب",`<select id="eSt" class="input-field"><option value="تم التنفيذ">موافقة وتنفيذ</option><option value="مرفوض">رفض الطلب</option></select>`,async()=>{ await fetch(API_URL,{method:'POST',body:JSON.stringify({action:"hr_edit_action",reqId:id,status:document.getElementById('eSt').value})}); closeModal(); loadEditRequests(); showToast("تم"); }); }
         
-        async function loadEmployeeTracker(){ const fp=document.getElementById('trackFP').value; if(!fp) return showToast("أدخل البصمة",true); const r=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:"get_emp_full_profile",searchFP:fp})}); const d=await r.json(); const tb=document.getElementById('activeTbody'); tb.innerHTML=""; if(d.data.attendance.length) tb.innerHTML+=`<tr><td colspan="4" class="text-center bg-blue-50 font-bold p-3 text-blue-800">أيام الحضور المسجلة: ${d.data.attendance.length}</td></tr>`; d.data.transactions.forEach(x=>tb.innerHTML+=`<tr><td>${x.type}</td><td class="font-bold">${x.amount}</td><td class="text-xs">${x.reason}</td><td class="font-mono text-xs">${x.date}</td></tr>`); }
+        async function loadEmployeeTracker(){ 
+            const fp = document.getElementById('trackFP').value; 
+            if(!fp) return showToast("أدخل البصمة", true); 
+            
+            const tb = document.getElementById('activeTbody'); 
+            tb.innerHTML = '<tr><td colspan="100%" class="text-center p-10"><span class="loader"></span> جاري البحث...</td></tr>';
+            
+            const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "get_emp_full_profile", searchFP: fp }) }); 
+            const d = await r.json(); 
+            
+            tb.innerHTML = ""; 
+            
+            // عرض الحضور
+            if(d.data.attendance.length) {
+                tb.innerHTML += `<tr><td colspan="5" class="text-center bg-blue-100 font-bold p-3 text-blue-800">سجل الحضور (${d.data.attendance.length} يوم)</td></tr>`;
+            } else {
+                tb.innerHTML += `<tr><td colspan="5" class="text-center text-gray-400 p-2">لا يوجد سجل حضور</td></tr>`;
+            }
+
+            // عرض المعاملات بالألوان
+            d.data.transactions.forEach(x => {
+                let rowClass = "";
+                if (x.sheetType === 'fine') rowClass = x.type === 'تنبيه' ? 'row-warning' : 'row-fine';
+                else if (x.sheetType === 'bonus') rowClass = 'row-bonus';
+                else if (x.sheetType === 'ratio') rowClass = 'row-ratio';
+
+                tb.innerHTML += `<tr class="${rowClass}">
+                    <td>${x.type}</td>
+                    <td class="font-bold">${x.amount}</td>
+                    <td class="text-xs">${x.reason}</td>
+                    <td class="font-mono text-xs">${x.date}</td>
+                    <td><span class="text-xs p-1 rounded bg-white border shadow-sm">${x.objStatus}</span></td>
+                </tr>`;
+            });
+            
+            if(!d.data.transactions.length) tb.innerHTML += `<tr><td colspan="5" class="text-center text-gray-400 p-4">لا توجد غرامات أو مكافآت مسجلة</td></tr>`;
+        }
         
         async function openAddUserModal(){ showModal("إضافة موظف جديد",`<input id="uCode" class="input-field mb-2" placeholder="الرمز الوظيفي"><input id="uFp" class="input-field mb-2" placeholder="رقم البصمة"><input id="uName" class="input-field mb-2" placeholder="الاسم الكامل"><input id="uSec" class="input-field mb-2" placeholder="القسم"><div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2 rounded"><label><input type="checkbox" id="pF"> صلاحية الغرامات</label><label><input type="checkbox" id="pB"> صلاحية المكافآت</label><label><input type="checkbox" id="pR"> صلاحية النسب</label><label><input type="checkbox" id="pH"> صلاحية HR</label><label><input type="checkbox" id="pA"> صلاحية Admin</label></div>`,async()=>{ const d={code:document.getElementById('uCode').value,fp:document.getElementById('uFp').value,name:document.getElementById('uName').value,sec:document.getElementById('uSec').value,pFine:document.getElementById('pF').checked?'نعم':'لا',pBonus:document.getElementById('pB').checked?'نعم':'لا',pRatio:document.getElementById('pR').checked?'نعم':'لا',pHR:document.getElementById('pH').checked?'نعم':'لا',pAdmin:document.getElementById('pA').checked?'نعم':'لا'}; await fetch(API_URL,{method:'POST',body:JSON.stringify({action:"manage_users",subAction:"add",userData:d})}); closeModal(); openSettings(); showToast("تم إضافة الموظف"); }); }
         
