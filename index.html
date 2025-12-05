@@ -467,7 +467,7 @@
 
     <script>
         // *** رابط السيرفر المحدث ***
-        const API_URL = "https://script.google.com/macros/s/AKfycbxidK95TBzj_D-qfqoZwCTdPqe2lQYLTpyrNqal5Kpy0mvdAu-AplWniAyL7voE_LaVPg/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbxcuVP37Dczhmo0wANSxpotgjGXtfyv5Nd5EXSR2KMUMqlTe4cya9cKbwcvmzM4MKLY-Q/exec";
         
         // متغيرات الحالة
         let currentUser = null;
@@ -992,4 +992,5 @@
         async function openSettings(){ hideAll(); document.getElementById('settingsSection').classList.remove('hidden'); const r=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:"manage_users",subAction:"get_all"})}); const d=await r.json(); const tb=document.getElementById('usersBody'); tb.innerHTML=""; d.data.forEach(u=>tb.innerHTML+=`<tr><td>${u.code}</td><td>${u.fp}</td><td>${u.name}</td><td>${u.sec}</td><td class="text-xs text-gray-500">Fine:${u.pFine}|HR:${u.pHR}</td><td><button onclick="if(confirm('حذف المستخدم؟'))fetch(API_URL,{method:'POST',body:JSON.stringify({action:'manage_users',subAction:'delete',row:'${u.row}'})}).then(()=>openSettings())" class="text-red-500 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`); }
     </script>
 </body>
+
 </html>
