@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام الموارد البشرية V29 - النسخة الكاملة والمستقرة</title>
     
-    <!-- مكتبات خارجية -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -18,7 +16,7 @@
             background-color: #f1f5f9; 
             color: #1e293b; 
             font-size: 14px; 
-            overflow-x: hidden; /* منع التمرير الأفقي للصفحة */
+            overflow-x: hidden; 
         }
         
         .hidden { display: none !important; }
@@ -29,7 +27,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             border: 1px solid #e2e8f0;
-            overflow-x: auto; /* شريط تمرير للجدول فقط */
+            overflow-x: auto; 
             -webkit-overflow-scrolling: touch;
             width: 100%;
             margin-bottom: 20px;
@@ -38,7 +36,7 @@
         .grid-table { 
             width: 100%; 
             border-collapse: collapse; 
-            min-width: 1200px; /* ضمان عرض الأعمدة بشكل صحيح */
+            min-width: 1200px; 
             table-layout: auto; 
         }
         
@@ -65,7 +63,6 @@
         
         /* تنسيق الأعمدة الخاصة */
         .col-name { min-width: 250px; text-align: right !important; font-weight: bold; }
-        .col-reason { min-width: 200px; text-align: right !important; }
         
         /* --- حقول الإدخال --- */
         .input-field { 
@@ -83,11 +80,6 @@
         .input-field:focus { 
             border-color: #2563eb; 
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); 
-        }
-        
-        .input-field.error { 
-            border-color: #ef4444; 
-            background-color: #fef2f2; 
         }
         
         .input-field:disabled {
@@ -124,9 +116,6 @@
         }
         .btn-secondary:hover { background: #e2e8f0; }
         
-        .btn-danger { background: #fee2e2; color: #dc2626; }
-        .btn-danger:hover { background: #fecaca; }
-
         /* --- التبويبات --- */
         .tab-btn { 
             padding: 12px 24px; 
@@ -155,19 +144,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* --- شريط الإحصائيات وزر الحفظ العائم --- */
-        .stats-bar {
-            display: flex; gap: 10px; flex-wrap: wrap;
-            background: #f8fafc; padding: 10px; 
-            border-radius: 10px; border: 1px solid #e2e8f0;
-            margin-bottom: 15px;
-        }
-        .stat-item {
-            background: white; padding: 6px 12px; 
-            border-radius: 6px; font-weight: bold; font-size: 0.85rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
-        }
-        
+        /* --- زر الحفظ العائم --- */
         .floating-save {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             background: #10b981; color: white; 
@@ -180,10 +157,17 @@
         }
         .floating-save:hover { transform: translateX(-50%) scale(1.05); }
         @keyframes slideUp { from { transform: translate(-50%, 150%); } to { transform: translate(-50%, 0); } }
+        
+        /* --- تنسيق الزر المعطل --- */
+        .btn:disabled, .cursor-not-allowed {
+            opacity: 0.6;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
 
         /* --- تحسينات للموبايل --- */
         @media (max-width: 768px) {
-            .input-field { font-size: 16px; /* منع التكبير التلقائي في iOS */ }
+            .input-field { font-size: 16px; }
             .grid-table th, .grid-table td { padding: 8px; font-size: 0.8rem; }
             .btn { padding: 8px 16px; font-size: 0.9rem; }
             #dashboardSection .grid { grid-template-columns: 1fr; }
@@ -195,7 +179,6 @@
 
     <div class="w-full max-w-[99%] bg-white rounded-3xl shadow-2xl overflow-hidden min-h-[90vh] flex flex-col border border-slate-200 relative">
         
-        <!-- Header -->
         <div class="bg-slate-900 text-white p-5 flex flex-wrap justify-between items-center shadow-lg z-20 gap-4">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center border border-white/10 shadow-inner">
@@ -213,7 +196,6 @@
 
         <div class="flex-1 bg-slate-50 relative overflow-hidden flex flex-col">
             
-            <!-- Login Section -->
             <div id="loginSection" class="absolute inset-0 flex items-center justify-center z-50 bg-slate-50/95 backdrop-blur-sm p-4 transition-all duration-500">
                 <div class="bg-white p-10 rounded-3xl shadow-2xl border border-slate-200 w-full max-w-sm text-center transform hover:scale-[1.01] transition">
                     <div class="mb-8 relative">
@@ -234,10 +216,8 @@
                 </div>
             </div>
 
-            <!-- Dashboard Section -->
             <div id="dashboardSection" class="hidden p-6 md:p-10 overflow-y-auto h-full">
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                    <!-- Cards -->
                     <div onclick="openBulkForm('fine')" id="btnFine" class="hidden cursor-pointer bg-white border-b-4 border-red-500 p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition group">
                         <div class="p-3 bg-red-50 rounded-xl text-red-500 w-fit mb-4 group-hover:bg-red-100 transition"><i class="fas fa-gavel text-3xl"></i></div>
                         <h3 class="font-bold text-xl text-slate-800">غرامات وتنبيهات</h3>
@@ -283,7 +263,6 @@
                 </div>
             </div>
 
-            <!-- Bulk Add Section -->
             <div id="bulkSection" class="hidden flex flex-col h-full p-4 md:p-6">
                 <div class="flex flex-wrap justify-between items-center mb-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 gap-3">
                     <div class="flex items-center gap-4">
@@ -330,10 +309,8 @@
                 </div>
             </div>
 
-            <!-- HR Portal Section -->
             <div id="hrSection" class="hidden flex flex-col h-full p-4">
                 <div class="flex flex-col gap-3 mb-3">
-                    <!-- Tabs -->
                     <div class="flex justify-between items-center bg-white p-2 rounded-xl border shadow-sm overflow-x-auto no-scrollbar">
                         <div class="flex items-center gap-2 min-w-max">
                             <button onclick="showDashboard()" class="btn btn-secondary px-3"><i class="fas fa-home"></i></button>
@@ -345,10 +322,8 @@
                         </div>
                     </div>
                     
-                    <!-- Stats Bar -->
                     <div id="statsContainer" class="hidden stats-bar"></div>
 
-                    <!-- Filter Area -->
                     <div id="monFilters" class="hidden bg-white p-4 rounded-xl border shadow-sm flex flex-wrap gap-4 items-end">
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 mb-1">من تاريخ</label>
@@ -375,7 +350,6 @@
                     </div>
                 </div>
 
-                <!-- Table Area -->
                 <div class="flex-1 table-container relative bg-slate-50/50">
                     <div id="trackerInputDiv" class="hidden p-6 bg-slate-50 border-b flex justify-center gap-3 shadow-sm">
                         <input type="number" id="trackFP" class="input-field w-64 text-center font-bold text-lg shadow-inner" placeholder="أدخل رقم البصمة">
@@ -397,13 +371,11 @@
                 </div>
             </div>
 
-            <!-- Floating Save Button -->
             <div id="batchSaveBtn" class="hidden floating-save" onclick="saveBatchUpdates()">
                 <i class="fas fa-save text-xl"></i> 
                 <span>حفظ كافة التغييرات (<span id="batchCount" class="bg-white text-green-600 px-2 rounded-full text-sm">0</span>)</span>
             </div>
 
-            <!-- Profile / History Section -->
             <div id="userHistorySection" class="hidden flex flex-col h-full p-4">
                 <div class="flex justify-between items-center mb-4 bg-white p-4 rounded-xl border shadow-sm">
                     <div class="flex items-center gap-3">
@@ -437,7 +409,6 @@
                 </div>
             </div>
 
-            <!-- Settings Section -->
             <div id="settingsSection" class="hidden flex flex-col h-full p-4">
                 <div class="flex justify-between items-center mb-4 bg-white p-4 rounded-xl shadow-sm border">
                     <button onclick="showDashboard()" class="btn btn-secondary"><i class="fas fa-arrow-right"></i> لوحة التحكم</button>
@@ -449,7 +420,6 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="uniModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl w-full max-w-lg shadow-2xl transform scale-100 transition-all border border-slate-200">
             <h3 id="mTitle" class="font-bold text-2xl mb-6 border-b pb-4 text-slate-800">...</h3>
@@ -467,7 +437,7 @@
 
     <script>
         // *** رابط السيرفر المحدث ***
-        const API_URL = "https://script.google.com/macros/s/AKfycbxcuVP37Dczhmo0wANSxpotgjGXtfyv5Nd5EXSR2KMUMqlTe4cya9cKbwcvmzM4MKLY-Q/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwgeV0Tm0dfsxcYPGoNCvJrPUhhMoiqLPhglncE7qgJmQ18F6XXrdBArFVta2LWMgJudw/exec";
         
         // متغيرات الحالة
         let currentUser = null;
@@ -655,25 +625,49 @@
             let errorMsg = "";
             const trs = document.querySelectorAll('#gridBody tr');
             
-            if(trs.length === 0) return showToast("القائمة فارغة", true);
+            // 1. التحقق من وجود صفوف
+            if(trs.length === 0) return showToast("القائمة فارغة، أضف بيانات أولاً", true);
 
+            // 2. التحقق من صحة البيانات في كل صف قبل الإرسال
             for (let i = 0; i < trs.length; i++) {
                 const tr = trs[i];
-                const fp = tr.querySelector('.fp-input').value;
-                const name = tr.querySelector('.name-input').value;
+                const fp = tr.querySelector('.fp-input').value.trim();
+                const name = tr.querySelector('.name-input').value.trim();
                 const type = tr.querySelector('.type-input').value;
-                const amt = parseFloat(tr.querySelector('.amount-input').value);
-                const reason = tr.querySelector('.reason-input').value;
+                const amtVal = tr.querySelector('.amount-input').value;
+                const amt = parseFloat(amtVal);
+                const reason = tr.querySelector('.reason-input').value.trim();
                 const grp = tr.querySelector('.grp-input').value;
 
-                if(!fp || !name || name === "غير موجود" || !reason || !grp) {
-                    errorMsg = `الصف رقم ${i+1}: هناك بيانات ناقصة (الاسم، البصمة، السبب، أو الجروب)`; break;
+                // أ) التحقق من اكتمال جلب الاسم
+                if (name === "جاري البحث...") {
+                    errorMsg = `خطأ في الصف رقم ${i+1}: يرجى الانتظار لحين ظهور اسم الموظف قبل الحفظ.`;
+                    break;
                 }
                 
+                // ب) التحقق من صحة البصمة
+                if (!name || name === "غير موجود" || name === "خطأ" || !name) {
+                    errorMsg = `خطأ في الصف رقم ${i+1}: رقم البصمة غير صحيح أو الموظف غير معرف.`;
+                    break;
+                }
+
+                // ج) التحقق من الحقول الإجبارية الأخرى
+                if(!fp || !reason || !grp) {
+                    errorMsg = `خطأ في الصف رقم ${i+1}: هناك بيانات ناقصة (السبب أو الجروب أو البصمة).`;
+                    break;
+                }
+                
+                // د) التحقق من المبلغ (حسب النوع)
                 if(currentMode === 'fine') {
-                    if(type === 'غرامة' && (isNaN(amt) || amt < 1000)) { errorMsg = `الصف رقم ${i+1}: الغرامة المالية يجب أن تكون 1000 دينار أو أكثر`; break; }
+                    if(type === 'غرامة' && (isNaN(amt) || amt < 1000)) { 
+                        errorMsg = `خطأ في الصف رقم ${i+1}: مبلغ الغرامة يجب أن يكون 1000 دينار أو أكثر.`; 
+                        break; 
+                    }
                 } else {
-                     if(isNaN(amt)) { errorMsg = `الصف رقم ${i+1}: المبلغ غير صحيح`; break; }
+                     if(isNaN(amt)) { 
+                         errorMsg = `خطأ في الصف رقم ${i+1}: المبلغ غير صحيح.`; 
+                         break; 
+                     }
                 }
 
                 rows.push({
@@ -687,23 +681,38 @@
                 });
             }
 
+            // إذا وجد خطأ، نوقف العملية ونظهر الرسالة
             if(errorMsg) return showToast(errorMsg, true);
 
+            // 3. قفل الزر وتغيير حالته (لمنع التكرار)
             const btn = document.getElementById('btnSubmitBulk');
-            btn.innerHTML = '<span class="loader border-white border-t-transparent"></span> جاري الإرسال...';
-            btn.disabled = true;
+            const originalText = btn.innerHTML; // حفظ النص الأصلي للزر
+            
+            btn.innerHTML = '<span class="loader border-white border-t-transparent"></span> جاري الحفظ والإرسال...';
+            btn.disabled = true; // تعطيل الزر تماماً
+            btn.classList.add('opacity-50', 'cursor-not-allowed'); // تغيير الشكل ليدل على التعطيل
             
             try {
-                const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "save_bulk", mode: currentMode, rows, addedBy: currentUser.name }) });
+                const r = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: "save_bulk", mode: currentMode, rows, addedBy: currentUser.name }) 
+                });
                 const d = await r.json();
+                
                 if(d.result === "success") {
                     showToast("تم الحفظ والإرسال بنجاح");
-                    openBulkForm(currentMode); // Reset
-                } else showToast("حدث خطأ في السيرفر", true);
-            } catch(e) { showToast("فشل الاتصال", true); }
-            
-            btn.innerHTML = '<span>حفظ وإرسال البيانات</span> <i class="fas fa-paper-plane"></i>';
-            btn.disabled = false;
+                    openBulkForm(currentMode); // إعادة تعيين الجدول وتنظيفه
+                } else {
+                    showToast("حدث خطأ في السيرفر: " + d.message, true);
+                }
+            } catch(e) { 
+                showToast("فشل الاتصال بالسيرفر، تأكد من الإنترنت", true); 
+            } finally {
+                // 4. إعادة تفعيل الزر في كل الأحوال (سواء نجح أو فشل)
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
         }
 
         // --- HR Portal Logic ---
@@ -722,7 +731,6 @@
             if(t === 'objections') {
                 document.getElementById('tabObj').classList.add('active');
                 document.getElementById('statsContainer').classList.remove('hidden');
-                // عرض الاعتراضات لا يحتاج فلتر تاريخ بالضرورة
                 th.innerHTML = `<tr><th>الموظف</th><th>البيانات</th><th>السبب</th><th>الاعتراض / الصورة</th><th>التواريخ</th><th>الحالة</th><th>إجراء</th></tr>`;
                 loadMonitoringFiltered(); 
             } else if(t === 'monitoring') {
@@ -747,9 +755,6 @@
             const d2 = document.getElementById('fDate2').value;
             const spe = document.getElementById('fClass').value;
             const isObj = document.getElementById('tabObj').classList.contains('active');
-            
-            // المتابعة تتطلب تحديد تاريخ، الاعتراضات لا تتطلب
-            // if(!isObj && (!d1 || !d2)) return showToast("حدد التاريخ للمتابعة", true);
             
             document.getElementById('monPlaceholder').classList.add('hidden');
             document.getElementById('activeTbody').innerHTML = '<tr><td colspan="100%" class="text-center p-10"><span class="loader"></span> جاري جلب البيانات...</td></tr>';
@@ -790,7 +795,6 @@
                     </tr>`;
                 });
             } else {
-                // Objections Table
                 data.forEach(x => {
                     const imgBtn = x.objImg ? `<a href="${x.objImg}" target="_blank" class="inline-flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-700 transition mt-2"><i class="fas fa-image"></i> عرض الصورة</a>` : '';
                     tb.innerHTML += `<tr>
@@ -992,5 +996,4 @@
         async function openSettings(){ hideAll(); document.getElementById('settingsSection').classList.remove('hidden'); const r=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:"manage_users",subAction:"get_all"})}); const d=await r.json(); const tb=document.getElementById('usersBody'); tb.innerHTML=""; d.data.forEach(u=>tb.innerHTML+=`<tr><td>${u.code}</td><td>${u.fp}</td><td>${u.name}</td><td>${u.sec}</td><td class="text-xs text-gray-500">Fine:${u.pFine}|HR:${u.pHR}</td><td><button onclick="if(confirm('حذف المستخدم؟'))fetch(API_URL,{method:'POST',body:JSON.stringify({action:'manage_users',subAction:'delete',row:'${u.row}'})}).then(()=>openSettings())" class="text-red-500 bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button></td></tr>`); }
     </script>
 </body>
-
 </html>
